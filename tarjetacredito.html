@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Tarjetas 💳</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        header {
+            background: #222;
+            color: #fff;
+            padding: 15px 20px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        main {
+            padding: 0 20px 20px 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        nav {
+            margin: 0 -20px 15px -20px;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #f5f5f5;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #ddd;
+        }
+        nav button {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #e0e0e0;
+        }
+        nav button.active {
+            background: #4caf50;
+            color: #fff;
+            font-weight: 600;
+        }
+        section {
+            display: none;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        section.active {
+            display: block;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .card {
+            border-radius: 8px;
+            padding: 12px;
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            margin-bottom: 10px;
+        }
+        .card-alerta {
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .card-tarjeta {
+            background: #fff;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+        .card-tarjeta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            gap: 8px;
+        }
+        .card-tarjeta-body {
+            font-size: 13px;
+            color: #444;
+        }
+        .muted {
+            color: #666;
+            font-size: 14px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        input, select {
+            width: 100%;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="checkbox"] {
+            width: auto;
+        }
+        .btn-primary {
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .btn-secondary, .btn-link {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-link {
+            background: transparent;
+            color: #1976d2;
+            text-decoration: underline;
+            padding: 0;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: #fff;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            background: #eee;
+            margin-left: 4px;
+        }
+        .badge.pending {
+            background: #ffeb3b;
+        }
+        .badge.checked {
+            background: #c8e6c9;
+        }
+        .badge-alert {
+            background: #ffcc80;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        .right {
+            text-align: right;
+        }
+        .small {
+            font-size: 12px;
+        }
+        .danger {
+            color: #d32f2f;
+        }
+        .success {
+            color: #388e3c;
+        }
+        .stat-box {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        .bar-container {
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            height: 8px;
+            margin-bottom: 6px;
+        }
+        .bar-fill {
+            height: 8px;
+            background: #4caf50;
+        }
+        .chips {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: #eee;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+    </style>
+
+    <!-- Supabase JS (lista para usar cuando quieras) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+    <h1>Panel de Tarjetas 💳 – Control simple y claro</h1>
+</header>
+<main>
+
+    <!-- NAV FIJO ARRIBA -->
+    <nav>
+        <button data-section="sec-recomendacion" class="active">🏠 Inicio</button>
+        <button data-section="sec-verTarjetas">📋 Ver tarjetas</button>
+        <button data-section="sec-nuevaTarjeta">➕ Nueva tarjeta</button>
+        <button data-section="sec-recomendacion">💸 Nuevo movimiento</button>
+        <button data-section="sec-pagos">💵 Registrar pago</button>
+        <button data-section="sec-movFijos">🔁 Movimientos fijos</button>
+        <button data-section="sec-proximasCuotas">📅 Próximas cuotas</button>
+        <button data-section="sec-historial">📚 Historial</button>
+        <button data-section="sec-estadisticas">📊 Estadísticas</button>
+    </nav>
+
+    <!-- INICIO -->
+    <section id="sec-recomendacion" class="active">
+        <h2>🔔 Alertas importantes</h2>
+        <div id="alertasVencimiento" class="muted">
+            Sin alertas por ahora.
+        </div>
+
+        <hr style="margin:15px 0;">
+
+        <h2>⭐ Tarjeta recomendada para usar hoy</h2>
+        <div id="recomendacionContenido" class="muted">
+            No hay tarjetas cargadas todavía.
+            <button class="btn-link" onclick="openSection('sec-nuevaTarjeta')">Cargar una tarjeta ahora</button>.
+        </div>
+
+        <hr style="margin:15px 0;">
+
+        <h2>💸 Registrar nuevo movimiento rápido</h2>
+        <form id="formMovimiento">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tarjeta 💳</label>
+                    <select id="movCardSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha del movimiento 📆</label>
+                    <input type="date" id="movDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Monto (Gs) 💰</label>
+                    <input type="text" id="movAmount" required placeholder="Ej: 2.500.000">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Descripción 📝</label>
+                    <input type="text" id="movDescription" required placeholder="Ej: Celular, súper, etc.">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="movIsInstallment">
+                        ¿Es en cuotas? (si NO, dejá desmarcado)
+                    </label>
+                    <input type="number" id="movInstallmentsCount" min="1" step="1" value="1" placeholder="Cantidad de cuotas">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="movHasCashback">
+                        ¿Tiene reintegro (cashback)?
+                    </label>
+                    <input type="number" id="movCashbackPercent" min="0" max="100" step="1" placeholder="% reintegro">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Guardar movimiento 💾</button>
+        </form>
+        <p class="small muted">
+            Si marcás “Es en cuotas”, el sistema genera automáticamente las cuotas mensuales iguales
+            (ej: 400.000 Gs en 4 cuotas → 100.000 Gs cada una).
+        </p>
+
+        <h3 class="small" style="margin-top:15px;">📜 Últimos movimientos cargados</h3>
+        <div id="listaMovimientosRecientes"></div>
+        <p class="small muted">
+            ✅ actualiza el saldo de la tarjeta.  
+            🗑 elimina el movimiento si lo cargaste mal.
+        </p>
+    </section>
+
+    <!-- Ver tarjetas -->
+    <section id="sec-verTarjetas">
+        <h2>📋 Resumen de tarjetas</h2>
+        <div id="listaTarjetas"></div>
+    </section>
+
+    <!-- Nueva tarjeta -->
+    <section id="sec-nuevaTarjeta">
+        <h2>➕ Registrar nueva tarjeta</h2>
+        <form id="formTarjeta">
+            <div class="form-row">
+                <div className="form-group">
+                    <label>Nombre de la tarjeta 🏷️</label>
+                    <input type="text" id="cardName" required placeholder="Ej: Visa Gold, Mastercard Clásica…">
+                </div>
+                <div class="form-group">
+                    <label>Banco / Emisor 🏦</label>
+                    <input type="text" id="cardBank" placeholder="Ej: Banco Atlas, Itaú, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Tasa de interés anual (%) 📈</label>
+                    <input type="number" id="cardAnnualRate" min="0" step="0.1" placeholder="Ej: 45">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha de cierre 📆</label>
+                    <input type="date" id="cardClosingDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de vencimiento 📅</label>
+                    <input type="date" id="cardDueDate" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Límite de crédito (Gs) 💰</label>
+                    <input type="text" id="cardLimit" required placeholder="Ej: 5.000.000">
+                </div>
+                <div class="form-group">
+                    <label>Saldo actual adeudado (Gs) 🔻</label>
+                    <input type="text" id="cardCurrentBalance" required placeholder="Ej: 1.200.000">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Guardar tarjeta 💾</button>
+        </form>
+    </section>
+
+    <!-- Registrar pago -->
+    <section id="sec-pagos">
+        <h2>💵 Registrar pago a tarjeta</h2>
+        <form id="formPago">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tarjeta 💳</label>
+                    <select id="payCardSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha del pago 📆</label>
+                    <input type="date" id="payDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Monto pagado (Gs) 💰</label>
+                    <input type="text" id="payAmount" required placeholder="Ej: 1.000.000">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Descripción (opcional) 📝</label>
+                    <input type="text" id="payDescription" placeholder="Ej: Pago desde cuenta sueldo">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Registrar pago 💾</button>
+        </form>
+
+        <h3 class="small" style="margin-top:15px;">🧾 Pagos recientes</h3>
+        <div id="listaPagosRecientes"></div>
+        <p class="small muted">
+            Cada pago reduce el saldo de la tarjeta.  
+            🗑 revierte el efecto del pago.
+        </p>
+    </section>
+
+    <!-- Movimientos fijos -->
+    <section id="sec-movFijos">
+        <h2>🔁 Movimientos fijos (mantenimiento, suscripciones, etc.)</h2>
+        <form id="formMovFijo">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tarjeta 💳</label>
+                    <select id="fixCardSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Descripción 📝</label>
+                    <input type="text" id="fixDescription" required placeholder="Ej: Netflix, mantenimiento tarjeta…">
+                </div>
+                <div class="form-group">
+                    <label>Monto mensual (Gs) 💰</label>
+                    <input type="text" id="fixAmount" required placeholder="Ej: 50.000">
+                </div>
+                <div class="form-group">
+                    <label>Día de cobro (1-31) 📆</label>
+                    <input type="number" id="fixChargeDay" min="1" max="31" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Guardar movimiento fijo 💾</button>
+        </form>
+
+        <h3 class="small" style="margin-top:15px;">Lista de movimientos fijos este mes</h3>
+        <div id="listaMovFijos"></div>
+        <p class="small muted">
+            ✅ marca que ya se cobró este mes y suma al saldo de la tarjeta.  
+            🗑 elimina el movimiento fijo si ya no lo usás.
+        </p>
+    </section>
+
+    <!-- Próximas cuotas -->
+    <section id="sec-proximasCuotas">
+        <h2>📅 Próximas cuotas a pagar</h2>
+        <div id="listaCuotas"></div>
+        <p class="small muted">
+            ✅ marca una cuota como chequeada (actualiza saldo).  
+            🗑 elimina la cuota si la cargaste por error.
+        </p>
+    </section>
+
+    <!-- Historial -->
+    <section id="sec-historial">
+        <h2>📚 Historial de actividades</h2>
+        <div id="historialContenido"></div>
+        <p class="small muted">
+            Rojo = deuda generada (compras/cuotas, fijos).  
+            Verde = pagos que reducen la deuda.
+        </p>
+    </section>
+
+    <!-- Estadísticas -->
+    <section id="sec-estadisticas">
+        <h2>📊 Estadísticas generales</h2>
+        <div id="estadisticasContenido"></div>
+        <p class="small muted">
+            El pago mínimo se calcula con un porcentaje configurable (por defecto 15% de la deuda).  
+            Los intereses son estimaciones aproximadas usando la tasa anual que cargás en cada tarjeta
+            para un mes.
+        </p>
+    </section>
+
+</main>
+
+<script>
+    // ====== Supabase: listo para que pongas tus datos ======
+    const SUPABASE_URL = 'https://ekxfpybwtlppxpdswmai.supabase.co'; // ← reemplazá esto
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVreGZweWJ3dGxwcHhwZHN3bWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4ODM1NDYsImV4cCI6MjA3ODQ1OTU0Nn0.9PViBzf0jHp45qyQ1NWMyDaYERgp-m5mWQi5hzBtEy4';            // ← y esto
+
+    let supabaseClient = null;
+    if (window.supabase && SUPABASE_URL !== 'https://TU-PROYECTO.supabase.co') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Más adelante podemos cambiar loadState/saveState para usar Supabase en vez de localStorage.
+    }
+
+    // ====== Estado y helpers básicos ======
+    const STORAGE_KEY = 'panelTarjetasEstadoV3';
+
+    let state = {
+        cards: [],          // {id, name, bankName, annualRate, closingDate, dueDate, creditLimit, currentBalance}
+        installments: [],   // {id, cardId, description, dueDate, amount, number, totalCount, checked, createdAt}
+        fixedMovements: [], // {id, cardId, description, amount, chargeDay, lastCheckedMonth, createdAt}
+        payments: []        // {id, cardId, date, amount, description, createdAt}
+    };
+
+    const PAGO_MINIMO_PORC = 0.15; // 15%
+
+    function generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substring(2);
+    }
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        // Hook futuro: acá podrías llamar a Supabase para sincronizar.
+    }
+
+    function loadState() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                state = JSON.parse(raw);
+            } catch (e) {
+                console.error('No se pudo leer el estado, se reinicia.', e);
+            }
+        }
+        if (!state.cards) state.cards = [];
+        if (!state.installments) state.installments = [];
+        if (!state.fixedMovements) state.fixedMovements = [];
+        if (!state.payments) state.payments = [];
+    }
+
+    function parseDate(str) {
+        if (!str) return null;
+        const d = new Date(str);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    function diffDays(from, to) {
+        const ms = to - from;
+        return Math.ceil(ms / (1000 * 60 * 60 * 24));
+    }
+
+    function formatDateDMY(str) {
+        const d = parseDate(str);
+        if (!d) return '-';
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    function formatDateDMYFromDate(d) {
+        if (!d) return '-';
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    function formatGs(n) {
+        if (isNaN(n)) return '-';
+        return n.toLocaleString('es-PY', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }) + ' Gs';
+    }
+
+    // Inputs de dinero con puntos de miles
+    function setupMoneyInput(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+            let val = el.value;
+            const digits = val.replace(/\D/g, '');
+            if (!digits) {
+                el.value = '';
+                return;
+            }
+            const n = parseInt(digits, 10);
+            el.value = n.toLocaleString('es-PY', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        });
+    }
+
+    function getMoneyValue(id) {
+        const el = document.getElementById(id);
+        if (!el || !el.value) return 0;
+        const digits = el.value.replace(/\./g, '').replace(/,/g, '');
+        return Number(digits) || 0;
+    }
+
+    function applyChargeToCard(cardId, amount, apply) {
+        const card = state.cards.find(c => c.id === cardId);
+        if (!card) return;
+        const actual = Number(card.currentBalance) || 0;
+        const delta = apply ? amount : -amount;
+        card.currentBalance = actual + delta;
+    }
+
+    // Avanzar fechas de cierre/vencimiento al siguiente ciclo mensual si están en el pasado
+    function normalizeCardCycles() {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let changed = false;
+
+        function nextMonthlyDate(dateStr) {
+            const d = parseDate(dateStr);
+            if (!d) return null;
+            d.setHours(0,0,0,0);
+            const t = new Date(today);
+            t.setHours(0,0,0,0);
+            while (d < t) {
+                d.setMonth(d.getMonth() + 1);
+            }
+            return d;
+        }
+
+        state.cards.forEach(card => {
+            if (card.dueDate) {
+                const nextDue = nextMonthlyDate(card.dueDate);
+                if (nextDue) {
+                    const newStr = nextDue.toISOString().slice(0,10);
+                    if (newStr !== card.dueDate) {
+                        card.dueDate = newStr;
+                        changed = true;
+                    }
+                }
+            }
+            if (card.closingDate) {
+                const nextClose = nextMonthlyDate(card.closingDate);
+                if (nextClose) {
+                    const newStr = nextClose.toISOString().slice(0,10);
+                    if (newStr !== card.closingDate) {
+                        card.closingDate = newStr;
+                        changed = true;
+                    }
+                }
+            }
+        });
+
+        if (changed) saveState();
+    }
+
+    // ====== Navegación ======
+    const navButtons = document.querySelectorAll('nav button');
+    const sections = document.querySelectorAll('main section');
+
+    function setActiveSection(id) {
+        sections.forEach(sec => {
+            sec.classList.toggle('active', sec.id === id);
+        });
+        navButtons.forEach(b => {
+            b.classList.toggle('active', b.dataset.section === id);
+        });
+    }
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.section;
+            setActiveSection(targetId);
+        });
+    });
+
+    window.openSection = function(id) {
+        const btn = document.querySelector(`nav button[data-section="${id}"]`);
+        if (btn) btn.click();
+        else setActiveSection(id);
+    };
+
+    // ====== Selects de tarjetas ======
+    function renderCardSelects() {
+        const movSel = document.getElementById('movCardSelect');
+        const fixSel = document.getElementById('fixCardSelect');
+        const paySel = document.getElementById('payCardSelect');
+        [movSel, fixSel, paySel].forEach(sel => {
+            sel.innerHTML = '';
+            if (!state.cards.length) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Primero cargá una tarjeta';
+                sel.appendChild(opt);
+                sel.disabled = true;
+            } else {
+                sel.disabled = false;
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Seleccioná tarjeta...';
+                sel.appendChild(placeholder);
+                state.cards.forEach(card => {
+                    const opt = document.createElement('option');
+                    opt.value = card.id;
+                    opt.textContent = card.name;
+                    sel.appendChild(opt);
+                });
+            }
+        });
+    }
+
+    // ====== Ver tarjetas ======
+    function renderCardsView() {
+        const cont = document.getElementById('listaTarjetas');
+        if (!state.cards.length) {
+            cont.innerHTML = '<p class="muted">Todavía no hay tarjetas cargadas.</p>';
+            return;
+        }
+        const hoy = new Date();
+        let html = '';
+        state.cards.forEach(card => {
+            const limite = Number(card.creditLimit) || 0;
+            const saldo = Number(card.currentBalance) || 0;
+            const disponible = limite - saldo;
+            const due = parseDate(card.dueDate);
+            let diasTxt = '-';
+            if (due) {
+                const dias = diffDays(hoy, due);
+                diasTxt = `${dias} días`;
+            }
+            const bank = card.bankName && card.bankName.trim() ? card.bankName.trim() : 'Sin banco';
+            const rate = Number(card.annualRate) || 0;
+
+            html += `
+                <div class="card-tarjeta">
+                    <div class="card-tarjeta-header">
+                        <div>
+                            <span>💳 ${card.name}</span>
+                            <span class="chips">${bank}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="small muted">Límite: <b>${formatGs(limite)}</b></div>
+                            <button class="btn-secondary btn-danger small" onclick="deleteCard('${card.id}')">🗑 Eliminar</button>
+                        </div>
+                    </div>
+                    <div class="card-tarjeta-body">
+                        <div class="small">
+                            Cierre: <b>${formatDateDMY(card.closingDate)}</b> |
+                            Venc.: <b>${formatDateDMY(card.dueDate)}</b> |
+                            Días hasta venc.: <b>${diasTxt}</b>
+                        </div>
+                        <div class="small">
+                            Saldo actual: <span class="danger"><b>${formatGs(saldo)}</b></span>
+                        </div>
+                        <div class="small">
+                            Saldo disponible: <span class="success"><b>${formatGs(disponible)}</b></span>
+                        </div>
+                        <div class="small muted">
+                            Tasa anual: <b>${rate ? rate.toFixed(1) + ' %' : 'no cargada'}</b>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        cont.innerHTML = html;
+    }
+
+    // ====== Alertas de vencimiento y cálculos claves ======
+    function renderAlerts() {
+        const cont = document.getElementById('alertasVencimiento');
+        if (!state.cards.length) {
+            cont.innerHTML = '<span class="muted">Cargá una tarjeta para ver alertas.</span>';
+            return;
+        }
+
+        const hoy = new Date();
+        const alertas = [];
+
+        state.cards.forEach(card => {
+            const due = parseDate(card.dueDate);
+            if (!due) return;
+            const dias = diffDays(hoy, due);
+            const saldo = Number(card.currentBalance) || 0;
+            const rate = Number(card.annualRate) || 0;
+            if (saldo <= 0) return;
+
+            // Umbral: 10 días o menos
+            if (dias <= 10) {
+                const pagoTotal = saldo;
+                const pagoMin = saldo * PAGO_MINIMO_PORC;
+                const saldoPostMin = saldo - pagoMin;
+
+                let tasaMensual = 0;
+                let interesMes = 0;
+                let totalConInteres = saldoPostMin;
+                let extraVsPagarTodo = 0;
+
+                if (rate > 0) {
+                    tasaMensual = (rate / 100) / 12;
+                    interesMes = saldoPostMin * tasaMensual;
+                    totalConInteres = saldoPostMin + interesMes;
+                    extraVsPagarTodo = interesMes; // costo extra de "pagar mínimo y dejar saldo 1 mes"
+                }
+
+                alertas.push({
+                    card,
+                    dias,
+                    pagoTotal,
+                    pagoMin,
+                    saldoPostMin,
+                    interesMes,
+                    totalConInteres,
+                    extraVsPagarTodo
+                });
+            }
+        });
+
+        if (!alertas.length) {
+            cont.innerHTML = '<span class="muted">Sin alertas importantes por ahora.</span>';
+            return;
+        }
+
+        alertas.sort((a, b) => a.dias - b.dias);
+
+        let html = '';
+        alertas.forEach(a => {
+            html += `
+                <div class="card-alerta">
+                    <div>
+                        <b>💳 ${a.card.name}</b>
+                        <span class="badge badge-alert">faltan ${a.dias} días</span>
+                    </div>
+                    <div class="small">
+                        Deuda actual: <b>${formatGs(a.pagoTotal)}</b><br>
+                        Si cancelás todo ahora: <b>${formatGs(a.pagoTotal)}</b><br>
+                        Pago mínimo (aprox. ${ (PAGO_MINIMO_PORC*100).toFixed(0) }%): <b>${formatGs(a.pagoMin)}</b><br>
+                        Deuda que quedaría si pagás sólo el mínimo: <b>${formatGs(a.saldoPostMin)}</b><br>
+                        ${
+                            a.interesMes > 0
+                            ? `Interés aprox. el próximo mes sobre esa deuda: <b>${formatGs(a.interesMes)}</b><br>
+                               Total aprox. a futuro si pagás mínimo y luego todo: <b>${formatGs(a.totalConInteres)}</b><br>
+                               Extra que pagarías por no cancelar hoy: <b>${formatGs(a.extraVsPagarTodo)}</b>`
+                            : '<span class="muted">Sin tasa anual cargada, no se puede estimar el interés.</span>'
+                        }
+                    </div>
+                </div>
+            `;
+        });
+
+        cont.innerHTML = html;
+    }
+
+    // ====== Recomendación ======
+    function renderRecommendation() {
+        const cont = document.getElementById('recomendacionContenido');
+        if (!state.cards.length) {
+            cont.innerHTML = `
+                No hay tarjetas cargadas todavía.
+                <button class="btn-link" onclick="openSection('sec-nuevaTarjeta')">Cargar una tarjeta ahora</button>.
+            `;
+            return;
+        }
+        const hoy = new Date();
+        let mejor = null;
+        let mejorDias = -Infinity;
+
+        state.cards.forEach(card => {
+            const due = parseDate(card.dueDate);
+            if (!due) return;
+            const dias = diffDays(hoy, due);
+            if (dias > mejorDias) {
+                mejorDias = dias;
+                mejor = card;
+            }
+        });
+
+        if (!mejor) {
+            cont.innerHTML = 'No se pudo calcular recomendación. Revisá las fechas de vencimiento.';
+            return;
+        }
+
+        const limite = Number(mejor.creditLimit) || 0;
+        const saldo = Number(mejor.currentBalance) || 0;
+        const disponible = limite - saldo;
+
+        cont.innerHTML = `
+            <div class="card">
+                <strong>Tarjeta sugerida: ${mejor.name} 💳</strong><br>
+                <span class="small">
+                    Cierre: ${formatDateDMY(mejor.closingDate)} |
+                    Vencimiento: ${formatDateDMY(mejor.dueDate)} |
+                    Días hasta vencimiento: <b>${mejorDias}</b>
+                </span><br>
+                <span class="small">
+                    Límite: ${formatGs(limite)} |
+                    Saldo actual: ${formatGs(saldo)} |
+                    Disponible: ${formatGs(disponible)}
+                </span>
+                <p class="muted small" style="margin-top:6px;">
+                    Lógica: se sugiere la tarjeta con más días hasta el próximo vencimiento.
+                </p>
+            </div>
+        `;
+    }
+
+    // ====== Próximas cuotas ======
+    function renderInstallments() {
+        const cont = document.getElementById('listaCuotas');
+        if (!state.installments.length) {
+            cont.innerHTML = '<p class="muted">No hay cuotas pendientes cargadas.</p>';
+            return;
+        }
+        const hoy = new Date();
+        const list = [...state.installments].sort((a, b) => {
+            const da = parseDate(a.dueDate) || hoy;
+            const db = parseDate(b.dueDate) || hoy;
+            return da - db;
+        });
+
+        let html = '<table><thead><tr>' +
+            '<th>Tarjeta</th><th>Descripción</th><th>Cuota</th><th>Vence</th>' +
+            '<th class="right">Monto</th><th>Estado</th><th></th>' +
+            '</tr></thead><tbody>';
+
+        list.forEach(inst => {
+            const card = state.cards.find(c => c.id === inst.cardId);
+            const cardName = card ? card.name : 'Tarjeta eliminada';
+            const due = parseDate(inst.dueDate);
+            const dias = due ? diffDays(new Date(), due) : null;
+            let estado = inst.checked ? '<span class="badge checked">Chequeado</span>' :
+                '<span class="badge pending">Pendiente</span>';
+            if (!inst.checked && dias !== null && dias < 0) {
+                estado += ' <span class="danger small">⚠ vencida</span>';
+            }
+
+            html += `<tr>
+                <td>${cardName}</td>
+                <td>${inst.description}</td>
+                <td>${inst.number}/${inst.totalCount}</td>
+                <td>${formatDateDMY(inst.dueDate)}</td>
+                <td class="right">${formatGs(Number(inst.amount) || 0)}</td>
+                <td>${estado}</td>
+                <td>
+                    <button class="btn-secondary" onclick="toggleInstallmentChecked('${inst.id}')">✅</button>
+                    <button class="btn-secondary btn-danger" onclick="deleteInstallment('${inst.id}')">🗑</button>
+                </td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+    }
+
+    // ====== Movimientos recientes ======
+    function renderRecentMovements() {
+        const cont = document.getElementById('listaMovimientosRecientes');
+        if (!state.installments.length) {
+            cont.innerHTML = '<p class="muted">Todavía no registraste movimientos.</p>';
+            return;
+        }
+        const list = [...state.installments]
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            .slice(0, 10);
+
+        let html = '<table><thead><tr>' +
+            '<th>Tarjeta</th><th>Descripción</th><th>Cuota</th><th>Fecha</th>' +
+            '<th class="right">Monto</th><th>Estado</th><th></th>' +
+            '</tr></thead><tbody>';
+
+        list.forEach(inst => {
+            const card = state.cards.find(c => c.id === inst.cardId);
+            const cardName = card ? card.name : 'Tarjeta eliminada';
+            const due = parseDate(inst.dueDate);
+            const dias = due ? diffDays(new Date(), due) : null;
+            let estado = inst.checked ? '<span class="badge checked">Chequeado</span>' :
+                '<span class="badge pending">Pendiente</span>';
+            if (!inst.checked && dias !== null && dias < 0) {
+                estado += ' <span class="danger small">⚠ vencida</span>';
+            }
+
+            html += `<tr>
+                <td>${cardName}</td>
+                <td>${inst.description}</td>
+                <td>${inst.number}/${inst.totalCount}</td>
+                <td>${formatDateDMY(inst.dueDate)}</td>
+                <td class="right">${formatGs(Number(inst.amount) || 0)}</td>
+                <td>${estado}</td>
+                <td>
+                    <button class="btn-secondary" onclick="toggleInstallmentChecked('${inst.id}')">✅</button>
+                    <button class="btn-secondary btn-danger" onclick="deleteInstallment('${inst.id}')">🗑</button>
+                </td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+    }
+
+    // ====== Movimientos fijos ======
+    function renderFixedMovements() {
+        const cont = document.getElementById('listaMovFijos');
+        if (!state.fixedMovements.length) {
+            cont.innerHTML = '<p class="muted">No hay movimientos fijos cargados.</p>';
+            return;
+        }
+        const hoy = new Date();
+        const mesClaveActual = hoy.getFullYear() + '-' + (hoy.getMonth() + 1);
+
+        let html = '<table><thead><tr>' +
+            '<th>Tarjeta</th><th>Descripción</th><th>Día de cobro</th>' +
+            '<th class="right">Monto</th><th>Estado este mes</th><th></th>' +
+            '</tr></thead><tbody>';
+
+        state.fixedMovements.forEach(fix => {
+            const card = state.cards.find(c => c.id === fix.cardId);
+            const cardName = card ? card.name : 'Tarjeta eliminada';
+            const pendiente = fix.lastCheckedMonth !== mesClaveActual;
+            const estado = pendiente
+                ? '<span class="badge pending">Pendiente</span>'
+                : '<span class="badge checked">Chequeado</span>';
+
+            html += `<tr>
+                <td>${cardName}</td>
+                <td>${fix.description}</td>
+                <td>${fix.chargeDay}</td>
+                <td class="right">${formatGs(Number(fix.amount) || 0)}</td>
+                <td>${estado}</td>
+                <td>
+                    <button class="btn-secondary" onclick="toggleFixedChecked('${fix.id}')">✅</button>
+                    <button class="btn-secondary btn-danger" onclick="deleteFixed('${fix.id}')">🗑</button>
+                </td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+    }
+
+    // ====== Pagos recientes ======
+    function renderPaymentsRecent() {
+        const cont = document.getElementById('listaPagosRecientes');
+        if (!state.payments.length) {
+            cont.innerHTML = '<p class="muted">Todavía no registraste pagos.</p>';
+            return;
+        }
+        const list = [...state.payments]
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            .slice(0, 10);
+
+        let html = '<table><thead><tr>' +
+            '<th>Tarjeta</th><th>Descripción</th><th>Fecha</th>' +
+            '<th class="right">Monto pagado</th><th></th>' +
+            '</tr></thead><tbody>';
+
+        list.forEach(pay => {
+            const card = state.cards.find(c => c.id === pay.cardId);
+            const cardName = card ? card.name : 'Tarjeta eliminada';
+            const d = pay.date ? formatDateDMY(pay.date) :
+                (pay.createdAt ? formatDateDMYFromDate(new Date(pay.createdAt)) : '-');
+
+            html += `<tr>
+                <td>${cardName}</td>
+                <td>${pay.description || 'Pago a tarjeta'}</td>
+                <td>${d}</td>
+                <td class="right success"><b>${formatGs(Number(pay.amount) || 0)}</b></td>
+                <td>
+                    <button class="btn-secondary btn-danger" onclick="deletePayment('${pay.id}')">🗑</button>
+                </td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+    }
+
+    // ====== Historial ======
+    function renderHistory() {
+        const cont = document.getElementById('historialContenido');
+        const eventos = [];
+
+        // Cuotas / movimientos generados
+        state.installments.forEach(inst => {
+            eventos.push({
+                type: 'cuota',
+                createdAt: inst.createdAt || 0,
+                cardId: inst.cardId,
+                description: inst.description + (inst.totalCount > 1 ? ` (cuota ${inst.number}/${inst.totalCount})` : ''),
+                date: inst.dueDate,
+                amount: Number(inst.amount) || 0
+            });
+        });
+
+        // Pagos
+        state.payments.forEach(pay => {
+            eventos.push({
+                type: 'pago',
+                createdAt: pay.createdAt || 0,
+                cardId: pay.cardId,
+                description: pay.description || 'Pago a tarjeta',
+                date: pay.date,
+                amount: Number(pay.amount) || 0
+            });
+        });
+
+        // Movimientos fijos (alta del fijo)
+        state.fixedMovements.forEach(fix => {
+            eventos.push({
+                type: 'fijo',
+                createdAt: fix.createdAt || 0,
+                cardId: fix.cardId,
+                description: 'Mov. fijo: ' + fix.description,
+                date: null,
+                amount: Number(fix.amount) || 0
+            });
+        });
+
+        if (!eventos.length) {
+            cont.innerHTML = '<p class="muted">Todavía no hay actividades registradas.</p>';
+            return;
+        }
+
+        eventos.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        let html = '<table><thead><tr>' +
+            '<th>Fecha</th><th>Tipo</th><th>Tarjeta</th><th>Descripción</th>' +
+            '<th class="right">Monto</th>' +
+            '</tr></thead><tbody>';
+
+        eventos.forEach(ev => {
+            const card = state.cards.find(c => c.id === ev.cardId);
+            const cardName = card ? card.name : 'Tarjeta eliminada';
+            const tipo = ev.type === 'pago' ? 'Pago' :
+                         ev.type === 'cuota' ? 'Deuda (cuota)' :
+                         'Deuda fija';
+            const d = ev.date ? formatDateDMY(ev.date) :
+                (ev.createdAt ? formatDateDMYFromDate(new Date(ev.createdAt)) : '-');
+
+            const isPago = ev.type === 'pago';
+            const cls = isPago ? 'success' : 'danger';
+            const sign = isPago ? '-' : '+';
+
+            html += `<tr>
+                <td>${d}</td>
+                <td>${tipo}</td>
+                <td>${cardName}</td>
+                <td>${ev.description}</td>
+                <td class="right ${cls}"><b>${sign} ${formatGs(ev.amount)}</b></td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        cont.innerHTML = html;
+    }
+
+    // ====== Estadísticas ======
+    function renderStats() {
+        const cont = document.getElementById('estadisticasContenido');
+        const totalSaldo = state.cards.reduce((acc, c) => acc + (Number(c.currentBalance) || 0), 0);
+        const pagoMinimo = totalSaldo * PAGO_MINIMO_PORC;
+        const remanente = totalSaldo - pagoMinimo;
+
+        const cuotasPendientes = state.installments.filter(i => !i.checked);
+        const totalCuotasPend = cuotasPendientes.reduce((acc, i) => acc + (Number(i.amount) || 0), 0);
+
+        const totalFijosMes = state.fixedMovements.reduce((acc, f) => acc + (Number(f.amount) || 0), 0);
+
+        let html = '';
+
+        html += `<div class="stat-box">
+            <div class="small muted">Deuda total actual (suma de saldos)</div>
+            <div class="success"><strong>${formatGs(totalSaldo)}</strong></div>
+        </div>`;
+
+        html += `<div class="stat-box">
+            <div class="small muted">Pago mínimo estimado (${(PAGO_MINIMO_PORC*100).toFixed(0)}%)</div>
+            <div class="danger"><strong>${formatGs(pagoMinimo)}</strong></div>
+        </div>`;
+
+        html += `<div class="stat-box">
+            <div class="small muted">Deuda que seguiría si solo pagás el mínimo</div>
+            <div><strong>${formatGs(remanente)}</strong></div>
+        </div>`;
+
+        html += `<div style="margin-top:15px;"></div>`;
+
+        html += `<div class="stat-box">
+            <div class="small muted">Cuotas pendientes (cantidad)</div>
+            <div><strong>${cuotasPendientes.length}</strong></div>
+        </div>`;
+
+        html += `<div class="stat-box">
+            <div class="small muted">Total en cuotas pendientes</div>
+            <div><strong>${formatGs(totalCuotasPend)}</strong></div>
+        </div>`;
+
+        html += `<div class="stat-box">
+            <div class="small muted">Total mensual de movimientos fijos</div>
+            <div><strong>${formatGs(totalFijosMes)}</strong></div>
+        </div>`;
+
+        // Por banco
+        const bancos = {};
+        state.cards.forEach(card => {
+            const bank = card.bankName && card.bankName.trim() ? card.bankName.trim() : 'Sin banco';
+            const saldo = Number(card.currentBalance) || 0;
+            if (!bancos[bank]) bancos[bank] = 0;
+            bancos[bank] += saldo;
+        });
+
+        if (Object.keys(bancos).length) {
+            html += `<div style="margin-top:20px;">
+                <div class="small muted">Deuda total por banco</div>
+                <table>
+                    <thead><tr><th>Banco</th><th class="right">Deuda total</th></tr></thead>
+                    <tbody>
+            `;
+            Object.keys(bancos).forEach(bank => {
+                html += `<tr>
+                    <td>${bank}</td>
+                    <td class="right">${formatGs(bancos[bank])}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
+        }
+
+        // Barras por tarjeta
+        if (state.cards.length) {
+            const maxSaldo = state.cards.reduce((max, c) => {
+                const s = Number(c.currentBalance) || 0;
+                return s > max ? s : max;
+            }, 0);
+            html += `<div style="margin-top:20px;">
+                <div class="small muted">Deuda por tarjeta (barras proporcionales)</div>
+            `;
+            state.cards.forEach(card => {
+                const saldo = Number(card.currentBalance) || 0;
+                const ancho = maxSaldo > 0 ? (saldo / maxSaldo * 100) : 0;
+                html += `
+                    <div class="small">${card.name} – ${formatGs(saldo)}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width:${ancho}%;"></div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        // Detalle por tarjeta: vencimiento + interés estimado y escenarios
+        if (state.cards.length) {
+            const hoy = new Date();
+            html += `<div style="margin-top:20px;">
+                <div class="small muted">Detalle por tarjeta: vencimiento, intereses y escenarios de pago</div>
+            `;
+            state.cards.forEach(card => {
+                const saldo = Number(card.currentBalance) || 0;
+                const rate = Number(card.annualRate) || 0;
+                const due = parseDate(card.dueDate);
+                const vencStr = formatDateDMY(card.dueDate);
+                let diasTxt = 'sin fecha';
+                let dias = null;
+                if (due) {
+                    dias = diffDays(hoy, due);
+                    diasTxt = `faltan ${dias} días`;
+                }
+
+                const pagoTotal = saldo;
+                const pagoMin = saldo * PAGO_MINIMO_PORC;
+                const saldoPostMin = saldo - pagoMin;
+
+                let interesMes = 0;
+                let totalConInteres = saldoPostMin;
+                let extraVsPagarTodo = 0;
+
+                if (rate > 0 && saldo > 0) {
+                    const tasaMensual = (rate / 100) / 12;
+                    interesMes = saldoPostMin * tasaMensual;
+                    totalConInteres = saldoPostMin + interesMes;
+                    extraVsPagarTodo = interesMes;
+                }
+
+                html += `<div class="small" style="margin-top:6px;">
+                    <b>${card.name}</b> (${card.bankName || 'sin banco'})<br>
+                    Deuda actual: <b>${formatGs(saldo)}</b><br>
+                    Vencimiento: <b>${vencStr}</b> – ${diasTxt}.<br>
+                    Tasa anual: <b>${rate ? rate.toFixed(1) + ' %' : 'no cargada'}</b><br><br>
+                    👉 Si cancelás todo ahora: pagás <b>${formatGs(pagoTotal)}</b> y no generás intereses sobre este saldo.<br>
+                    👉 Si pagás sólo el mínimo (~${(PAGO_MINIMO_PORC*100).toFixed(0)}%): pagás <b>${formatGs(pagoMin)}</b>,<br>
+                    &nbsp;&nbsp;&nbsp;te queda deuda aprox.: <b>${formatGs(saldoPostMin)}</b>.<br>
+                    ${
+                        rate && saldo
+                        ? `👉 Interés aprox. sobre esa deuda el siguiente mes: <b>${formatGs(interesMes)}</b>.<br>
+                           👉 Total aprox. a futuro si luego cancelás todo: <b>${formatGs(totalConInteres)}</b>.<br>
+                           🔎 Costo extra de no pagar todo hoy (sólo por ese mes): <b>${formatGs(extraVsPagarTodo)}</b>.`
+                        : 'Sin tasa anual no se puede estimar el interés, pero los montos de pago mínimo sí son válidos.'
+                    }
+                </div>`;
+            });
+            html += '</div>';
+        }
+
+        cont.innerHTML = html;
+    }
+
+    // ====== Render global ======
+    function renderAll() {
+        renderCardSelects();
+        renderCardsView();
+        renderAlerts();
+        renderRecommendation();
+        renderInstallments();
+        renderRecentMovements();
+        renderFixedMovements();
+        renderPaymentsRecent();
+        renderHistory();
+        renderStats();
+    }
+
+    // ====== Acciones: cuotas / fijos / pagos / tarjetas ======
+    window.toggleInstallmentChecked = function(id) {
+        const inst = state.installments.find(i => i.id === id);
+        if (!inst) return;
+        const apply = !inst.checked;
+        const monto = Number(inst.amount) || 0;
+        applyChargeToCard(inst.cardId, monto, apply);
+        inst.checked = !inst.checked;
+        saveState();
+        renderAll();
+    };
+
+    window.deleteInstallment = function(id) {
+        const inst = state.installments.find(i => i.id === id);
+        if (!inst) return;
+        if (!confirm('¿Eliminar este movimiento/cuota?')) return;
+        if (inst.checked) {
+            const monto = Number(inst.amount) || 0;
+            applyChargeToCard(inst.cardId, monto, false);
+        }
+        state.installments = state.installments.filter(i => i.id !== id);
+        saveState();
+        renderAll();
+    };
+
+    window.toggleFixedChecked = function(id) {
+        const fix = state.fixedMovements.find(f => f.id === id);
+        if (!fix) return;
+        const hoy = new Date();
+        const mesClave = hoy.getFullYear() + '-' + (hoy.getMonth() + 1);
+        const pendiente = fix.lastCheckedMonth !== mesClave;
+        const monto = Number(fix.amount) || 0;
+
+        if (pendiente) {
+            fix.lastCheckedMonth = mesClave;
+            applyChargeToCard(fix.cardId, monto, true);
+        } else {
+            fix.lastCheckedMonth = null;
+            applyChargeToCard(fix.cardId, monto, false);
+        }
+
+        saveState();
+        renderAll();
+    };
+
+    window.deleteFixed = function(id) {
+        const fix = state.fixedMovements.find(f => f.id === id);
+        if (!fix) return;
+        if (!confirm('¿Eliminar este movimiento fijo?')) return;
+        state.fixedMovements = state.fixedMovements.filter(f => f.id !== id);
+        saveState();
+        renderAll();
+    };
+
+    window.deletePayment = function(id) {
+        const pay = state.payments.find(p => p.id === id);
+        if (!pay) return;
+        if (!confirm('¿Eliminar este pago y revertir su efecto sobre el saldo?')) return;
+        const monto = Number(pay.amount) || 0;
+        applyChargeToCard(pay.cardId, monto, true); // vuelvo a sumar la deuda
+        state.payments = state.payments.filter(p => p.id !== id);
+        saveState();
+        renderAll();
+    };
+
+    window.deleteCard = function(id) {
+        const card = state.cards.find(c => c.id === id);
+        if (!card) return;
+        if (!confirm('¿Eliminar esta tarjeta y todos sus movimientos asociados?')) return;
+        state.cards = state.cards.filter(c => c.id !== id);
+        state.installments = state.installments.filter(i => i.cardId !== id);
+        state.fixedMovements = state.fixedMovements.filter(f => f.cardId !== id);
+        state.payments = state.payments.filter(p => p.cardId !== id);
+        saveState();
+        renderAll();
+    };
+
+    // ====== Formularios ======
+    document.getElementById('formTarjeta').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('cardName').value.trim();
+        const bankName = document.getElementById('cardBank').value.trim();
+        const annualRate = Number(document.getElementById('cardAnnualRate').value) || 0;
+        const closingDate = document.getElementById('cardClosingDate').value;
+        const dueDate = document.getElementById('cardDueDate').value;
+        const creditLimit = getMoneyValue('cardLimit');
+        const currentBalance = getMoneyValue('cardCurrentBalance');
+
+        if (!name) return;
+
+        state.cards.push({
+            id: generateId(),
+            name,
+            bankName,
+            annualRate,
+            closingDate,
+            dueDate,
+            creditLimit,
+            currentBalance
+        });
+
+        saveState();
+        e.target.reset();
+        normalizeCardCycles();
+        renderAll();
+        alert('Tarjeta guardada ✅');
+    });
+
+    document.getElementById('formMovimiento').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cardId = document.getElementById('movCardSelect').value;
+        const date = document.getElementById('movDate').value;
+        const amount = getMoneyValue('movAmount');
+        const description = document.getElementById('movDescription').value.trim();
+        const isInstallment = document.getElementById('movIsInstallment').checked;
+        const installmentsCount = Number(document.getElementById('movInstallmentsCount').value) || 1;
+        const hasCashback = document.getElementById('movHasCashback').checked;
+        const cashbackPercent = Number(document.getElementById('movCashbackPercent').value) || 0;
+
+        if (!cardId || !date || !amount || !description) return;
+
+        const baseDate = parseDate(date) || new Date();
+        const createdAt = Date.now();
+
+        if (isInstallment && installmentsCount > 1) {
+            const montoCuota = Math.round(amount / installmentsCount);
+            for (let i = 1; i <= installmentsCount; i++) {
+                const d = new Date(baseDate);
+                d.setMonth(d.getMonth() + (i - 1));
+                state.installments.push({
+                    id: generateId(),
+                    cardId,
+                    description,
+                    dueDate: d.toISOString().slice(0,10),
+                    amount: montoCuota,
+                    number: i,
+                    totalCount: installmentsCount,
+                    checked: false,
+                    hasCashback,
+                    cashbackPercent,
+                    createdAt
+                });
+            }
+        } else {
+            const d = parseDate(date) || new Date();
+            state.installments.push({
+                id: generateId(),
+                cardId,
+                description,
+                dueDate: d.toISOString().slice(0,10),
+                amount,
+                number: 1,
+                totalCount: 1,
+                checked: false,
+                hasCashback,
+                cashbackPercent,
+                createdAt
+            });
+        }
+
+        saveState();
+        e.target.reset();
+        renderAll();
+        alert('Movimiento guardado ✅ (cuotas/movimiento generado)');
+    });
+
+    document.getElementById('formMovFijo').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cardId = document.getElementById('fixCardSelect').value;
+        const description = document.getElementById('fixDescription').value.trim();
+        const amount = getMoneyValue('fixAmount');
+        const chargeDay = Number(document.getElementById('fixChargeDay').value) || 1;
+
+        if (!cardId || !description || !amount || !chargeDay) return;
+
+        state.fixedMovements.push({
+            id: generateId(),
+            cardId,
+            description,
+            amount,
+            chargeDay,
+            lastCheckedMonth: null,
+            createdAt: Date.now()
+        });
+
+        saveState();
+        e.target.reset();
+        renderAll();
+        alert('Movimiento fijo guardado ✅');
+    });
+
+    document.getElementById('formPago').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cardId = document.getElementById('payCardSelect').value;
+        const date = document.getElementById('payDate').value;
+        const amount = getMoneyValue('payAmount');
+        const description = document.getElementById('payDescription').value.trim();
+
+        if (!cardId || !date || !amount) return;
+
+        const createdAt = Date.now();
+
+        // Aplicamos pago (reduce saldo)
+        applyChargeToCard(cardId, amount, false);
+
+        state.payments.push({
+            id: generateId(),
+            cardId,
+            date,
+            amount,
+            description,
+            createdAt
+        });
+
+        saveState();
+        e.target.reset();
+        renderAll();
+        alert('Pago registrado ✅');
+    });
+
+    // ====== Init ======
+    loadState();
+    normalizeCardCycles();
+    ['cardLimit', 'cardCurrentBalance', 'movAmount', 'fixAmount', 'payAmount'].forEach(setupMoneyInput);
+    renderAll();
+</script>
+
+</body>
+</html>
